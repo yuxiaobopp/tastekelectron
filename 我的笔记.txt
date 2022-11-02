@@ -15,12 +15,17 @@ A JavaScript error occurred in the main process :Uncaught Exception: AssertionEr
 
 ~~~！！！！nodejs 要装低版本，14.20.1
 
+---
 electron-egg\public 下的dist文件夹是从electron-egg\frontend 项目npm run build生成的，改了界面，要重新生成 然后重新复制到electron-egg\public下面覆盖掉
 
-
+---
 Error occurred in handler for 'controller.example.dbOperation': Error: The module '\\?\D:\electronproj\githubdemo\iot\oks\tastekplus\tastekelectrwas compiled against a different Node.js version using
 NODE_MODULE_VERSION 83. This version of Node.js requires
 NODE_MODULE_VERSION 89. Please try re-compiling or re-installing
 the module (for instance, using `npm rebuild` or `npm install`).
 解决方案：删除node_module文件夹和.lock文件
 执行npx electron-rebuild
+---
+//console.log(this.demoDB);
+//console.log(this.demoDB.getFilePath(this.demoDB.name));打印数据库存放位置
+找到数据库文件存放位置 C:\Users\yxb\AppData\Roaming\tastek\data\demo.json

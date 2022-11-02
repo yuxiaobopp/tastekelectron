@@ -14,11 +14,11 @@ class StorageService extends Service {
     super(ctx);
 
     // lowdb数据库
-    this.systemDB = Storage.JsonDB.connection('system');
+    this.systemDB = Storage.JsonDB.connection('system');//数据库名system
     let lowdbOptions = {
       driver: 'lowdb'
     }
-    this.demoDB = Storage.JsonDB.connection('demo', lowdbOptions);  
+    this.demoDB = Storage.JsonDB.connection('demo', lowdbOptions);  //数据库名demo
     this.systemDBKey = {
       cache: 'cache'
     };
@@ -46,7 +46,8 @@ class StorageService extends Service {
     if (!this.demoDB.db.has(key).value()) {
       this.demoDB.db.set(key, []).write();
     }
-    
+    //console.log(this.demoDB);
+    //console.log(this.demoDB.getFilePath(this.demoDB.name));打印数据库存放位置
     const data = this.demoDB.db
     .get(key)
     .push(user)
