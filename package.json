@@ -1,5 +1,5 @@
 {
-  "name": "ee",
+  "name": "tastek",
   "version": "2.2.1",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
@@ -28,9 +28,9 @@
     "re-sqlite": "electron-rebuild -f -w better-sqlite3"
   },
   "build": {
-    "productName": "ee",
-    "appId": "com.electron.ee",
-    "copyright": "wallace5303",
+    "productName": "Tastek_Iot",
+    "appId": "com.electron.Tastek_Iot",
+    "copyright": "Tastek_Iot",
     "directories": {
       "output": "out"
     },
