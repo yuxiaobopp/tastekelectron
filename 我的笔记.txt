@@ -1,0 +1,26 @@
+打包时候，没有配置npm run encrypt的情况下，去掉下面的"!electron/"    
+ "files": [
+      "**/*",
+      "!frontend/",
+      "!run/",
+      "!logs/",
+      "!data/",
+"!electron/"      
+    ],
+
+因为不去掉，会报错
+A JavaScript error occurred in the main process :Uncaught Exception: AssertionError[ERR_ASSERTION]:Directory out\win-ia32-unpacked\resources\app.asar\electron not exists at new EeCore
+因为是排除了文件
+参考语雀https://www.yuque.com/u34495/ee-doc/mmr6mu
+
+~~~！！！！nodejs 要装低版本，14.20.1
+
+electron-egg\public 下的dist文件夹是从electron-egg\frontend 项目npm run build生成的，改了界面，要重新生成 然后重新复制到electron-egg\public下面覆盖掉
+
+
+Error occurred in handler for 'controller.example.dbOperation': Error: The module '\\?\D:\electronproj\githubdemo\iot\oks\tastekplus\tastekelectrwas compiled against a different Node.js version using
+NODE_MODULE_VERSION 83. This version of Node.js requires
+NODE_MODULE_VERSION 89. Please try re-compiling or re-installing
+the module (for instance, using `npm rebuild` or `npm install`).
+解决方案：删除node_module文件夹和.lock文件
+执行npx electron-rebuild

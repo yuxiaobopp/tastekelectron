@@ -34,7 +34,7 @@ module.exports = (appInfo) => {
   };
 
   /* 开发者工具 */
-  config.openDevTools = false;
+  config.openDevTools = true;
 
   /**
    * 应用程序顶部菜单
@@ -65,8 +65,8 @@ module.exports = (appInfo) => {
 
   /* ee框架日志 */
   config.logger = {
-    appLogName: `ee-${dayjs().format('YYYY-MM-DD')}.log`, 
-    errorLogName: `ee-error-${dayjs().format('YYYY-MM-DD')}.log` 
+    appLogName: `tastek-${dayjs().format('YYYY-MM-DD')}.log`, 
+    errorLogName: `tastek-error-${dayjs().format('YYYY-MM-DD')}.log` 
   }
 
   /* 远程web地址 (可选) */
@@ -143,13 +143,13 @@ module.exports = (appInfo) => {
 
   /* 被浏览器唤醒 (可选) */
   config.awakeProtocol = {
-    protocol: 'ee', // 自定义协议名（默认你的应用名称-英文）
+    protocol: 'Tastek_Iot', // 自定义协议名（默认你的应用名称-英文）
     args: []
   };
 
   /* 托盘 (可选)  */
   config.tray = {
-    title: 'EE程序', // 托盘显示标题
+    title: 'Tastek_Iot', // 托盘显示标题
     icon: '/public/images/tray_logo.png' // 托盘图标
   }
 
