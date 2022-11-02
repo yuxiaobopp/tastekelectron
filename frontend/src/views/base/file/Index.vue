@@ -84,7 +84,7 @@ export default {
       file_list: fileList,
       image_info: [],
       num: 0,
-			dir_path: "D:\\www\\ee",
+			dir_path: "/temp",
     };
   },
   methods: {

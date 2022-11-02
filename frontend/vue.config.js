@@ -12,7 +12,7 @@ module.exports = {
       config
         .plugin('html')
         .tap(args => {
-          args[0].title= 'EE框架' // 设置title
+          args[0].title= 'Tastek_Iot' // 设置title
           return args
         })
     },
