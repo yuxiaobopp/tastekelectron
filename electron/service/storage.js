@@ -182,6 +182,97 @@ class StorageService extends Service {
 
     return true;
   }
+  
+  
+    /*
+   * 检查并创建AT指令表 (at sqlite)
+   */
+    async checkAndCreateATTableSqlite(tableName = '') {
+      if (_.isEmpty(tableName)) {
+        throw new Error(`table name is required`);
+      }
+      // 检查表是否存在
+      const userTable = this.demoSqliteDB.db.prepare('SELECT * FROM sqlite_master WHERE type=? AND name = ?');
+      const result = userTable.get('table', tableName);
+      //console.log('result:', result);
+      if (result) {
+        return;
+      }
+  
+      // 创建表
+      const create_table_user =
+      `CREATE TABLE ${tableName}
+       (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          at_key CHAR(200) NOT NULL,
+          eq CHAR(16),
+          at_param CHAR(1000) NULL
+       );`
+      this.demoSqliteDB.db.exec(create_table_user);
+  
+    }
+
+  /*
+   * 增 AT data (sqlite)
+   */
+  async addATSqlite(data) {
+    //console.log("add data:", data);
+
+    let table = 'atlist801';
+    await this.checkAndCreateATTableSqlite(table);
+
+    const insert = this.demoSqliteDB.db.prepare(`INSERT INTO ${table} (at_key,eq,at_param) VALUES (@at_key,@eq,@at_param)`);
+    insert.run(data);
+
+    return true;
+  }
+
+  /*
+   * 删 Test data (sqlite)
+   */
+  async delATSqlite(delete_at = '') {
+ 
+    let table = 'atlist801';
+    await this.checkAndCreateATTableSqlite(table);
+
+    const delUser = this.demoSqliteDB.db.prepare(`DELETE FROM ${table} WHERE at_key||eq||at_param = ?`);
+    delUser.run(delete_at);
+
+    return true;
+  }
+
+  /*
+   * 改 Test data (sqlite)
+   */
+  async updateATSqlite(data) {
+
+    let table = 'atlist801';
+    await this.checkAndCreateATTableSqlite(table);
+
+    const updateUser = this.demoSqliteDB.db.prepare(`UPDATE ${table} SET at_key = @at_key,eq = @eq,at_param = @at_param WHERE at_key||eq||at_param = ?`);
+    updateUser.run(data);
+
+    return true;
+  }  
+
+    /*
+   * all AT data (sqlite)
+   */
+    async getAllATDataSqlite(searchkey) {
+  
+      let table = 'atlist801';
+      await this.checkAndCreateATTableSqlite(table);
+  
+      if(searchkey==''||searchkey==null){
+        const all = this.demoSqliteDB.db.prepare(`SELECT * FROM ${table} `);
+        const allresult =  all.all();
+        return allresult;
+      }
+
+      const selectAllUser = this.demoSqliteDB.db.prepare(`SELECT * FROM ${table} where at_key||eq||at_param like '%`+searchkey+`%' `);
+      const allUser =  selectAllUser.all({searchkey:searchkey});
+      return allUser;
+    }  
 
   /*
    * 改 Test data (sqlite)
@@ -205,7 +296,7 @@ class StorageService extends Service {
     //console.log("select :", {age});
 
     let table = 'user';
-    await this.checkAndCreateTableSqlite(table);
+    await this.checkAndCreateATTableSqlite(table);
 
     const selectUser = this.demoSqliteDB.db.prepare(`SELECT * FROM ${table} WHERE age = @age`);
     const users = selectUser.all({age: age});

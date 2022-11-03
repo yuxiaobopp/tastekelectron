@@ -103,12 +103,17 @@ export const constantRouterMap = [
         name: 'Other',
         component: Menu,
         props: { id: 'other' },
-        redirect: { name: 'OtherTestIndex' },
+        redirect: { name: 'OtherInitATIndex' },
         children: [
           {
             path: '/other/test/index',
             name: 'OtherTestIndex',
             component: () => import('@/views/other/test/Index')
+          },
+          {
+            path: '/other/initAT/index',
+            name: 'OtherInitATIndex',
+            component: () => import('@/views/other/initAT/Index')
           },
         ] 
       }

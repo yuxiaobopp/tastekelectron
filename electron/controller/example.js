@@ -97,8 +97,12 @@ class ExampleController extends Controller {
       case 'add' :
         data.result = await service.storage.addTestDataSqlite(paramsObj.info);;
         break;
+     
       case 'del' :
         data.result = await service.storage.delTestDataSqlite(paramsObj.delete_name);;
+        break;
+      case 'delat' :
+        data.result = await service.storage.delATSqlite(paramsObj.delete_name);;
         break;
       case 'update' :
         data.result = await service.storage.updateTestDataSqlite(paramsObj.update_name, paramsObj.update_age);
@@ -109,7 +113,42 @@ class ExampleController extends Controller {
     }
 
     data.all_list = await service.storage.getAllTestDataSqlite();
+    return data;
+  }
 
+  /**
+   * sqlite数据库操作
+   */   
+   async atsqlitedbOperation(args) {
+    const { service } = this;
+    const paramsObj = args;
+    console.log('eeeee paramsObj:', paramsObj);
+    const data = {
+      action: paramsObj.action,
+      result: null,
+      atList: []
+    };
+    
+    switch (paramsObj.action) {
+      
+      case 'atadd' :
+        data.result = await service.storage.addATSqlite(paramsObj.info);;
+        break;
+      case 'atdel' :
+        data.result = await service.storage.delATSqlite(paramsObj.delete_name);;
+        break;
+      case 'atupdate' :
+        data.result = await service.storage.updateATSqlite(paramsObj.info);;
+        break;
+      case 'atget' :
+        data.result =  await service.storage.getAllATDataSqlite(paramsObj.searchkey);
+        break;
+      case 'atgetall' :
+        data.atList =  await service.storage.getAllATDataSqlite(paramsObj.searchkey);
+        break;
+    }
+
+    data.atList =  await service.storage.getAllATDataSqlite(paramsObj.searchkey);
     return data;
   }
 

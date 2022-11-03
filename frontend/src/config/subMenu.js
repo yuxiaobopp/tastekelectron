@@ -4,10 +4,10 @@
 export default {
 	base: {
 		'menu_100' : {
-			icon: 'profile',
+			icon: 'home',
 			title: '文件',
 			pageName: 'BaseFileIndex',
-			params: {}
+			params: {id:"0"}
 		},
 		'menu_300' : {
 			icon: 'profile',
@@ -99,6 +99,12 @@ export default {
 			icon: 'profile',
 			title: '测试',
 			pageName: 'OtherTestIndex',
+			params: {}
+		},
+		'menu_211' : {
+			icon: 'profile',
+			title: '指令维护',
+			pageName: 'OtherInitATIndex',
 			params: {}
 		},
 	}	
