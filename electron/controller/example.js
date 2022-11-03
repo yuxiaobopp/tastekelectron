@@ -189,7 +189,8 @@ class ExampleController extends Controller {
    */
   selectFolder () {
     const filePaths = dialog.showOpenDialogSync({
-      properties: ['openDirectory', 'createDirectory']
+      title:'请选择文件',
+      properties: ['createDirectory','openFile','multiSelections','showHiddenFiles','promptToCreate','dontAddToRecent']
     });
 
     if (_.isEmpty(filePaths)) {
@@ -199,6 +200,19 @@ class ExampleController extends Controller {
     return filePaths[0];
   } 
 
+  /**
+   * 导入excel文件
+   */
+   importExcel (filePath) {
+
+    if (_.isEmpty(filePath)) {
+      return false
+    }
+
+    
+
+    return true;
+  } 
   /**
    * 打开目录
    */

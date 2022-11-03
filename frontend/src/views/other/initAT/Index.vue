@@ -49,6 +49,33 @@
         </a-col>
       </a-row>
     </div>
+
+    <div class="one-block-1">
+      <span>
+        批量导入AT指令
+      </span>
+    </div>  
+    <div class="one-block-2">
+      <a-row>
+        <a-col :span="12">
+          <a-input v-model="dir_path" :value="dir_path" addon-before="选择导入文件" />
+        </a-col>
+       
+        <a-col :span="12">
+          <a-button @click="selectDir">
+            选择文件
+          </a-button>
+        </a-col>
+      </a-row>
+      <a-row>
+        <a-col :span="12">
+          <a-button @click="importAT">
+            导入
+          </a-button>
+        </a-col>
+      </a-row>
+    </div>
+
   </div>
  
 </template>
@@ -61,7 +88,8 @@ export default {
       at_key:null,
       at_param:null,
       eq:'=',
-      at_search_key:''
+      at_search_key:'',
+      dir_path: "/temp",
     };
   },
   mounted () {
@@ -140,6 +168,27 @@ export default {
         self.$message.error(`操作失败`);
       }) ;
     },
+    selectDir() {
+      const self = this;
+      self.$ipcInvoke(ipcApiRoute.selectFolder, '').then(r => {
+        self.dir_path = r;
+        self.$message.info(r);
+      })      
+    },
+    importAT(){
+      const self=this;
+      self.$ipcInvoke(ipcApiRoute.importExcel,self.dir_path).then(r=>{
+        console.log(self.dir_path);
+        console.log(r);
+        if(r==true){
+
+          self.$message.success('成功');
+          return;
+        }
+        
+        self.$message.error('导入失败')
+      })
+    }
   }
 };
 </script>
