@@ -2,6 +2,7 @@
 
 const Service = require('ee-core').Service;
 const Storage = require('ee-core').Storage;
+const { MenuItem } = require('electron');
 const _ = require('lodash');
 
 /**
@@ -227,6 +228,47 @@ class StorageService extends Service {
     return true;
   }
 
+    /*
+   * 批量新增 AT data (sqlite)
+   */
+    async addBatchATSqlite(datas) {
+  
+      let table = 'atlist801';
+      await this.checkAndCreateATTableSqlite(table);
+      
+      //组装sql
+      // let sql=`INSERT INTO ${table} (at_key,eq,at_param) values `;
+      
+      // let flag=0;
+
+      // datas.forEach(element => {
+       
+      //   sql+=`(?'`+element.at_key +`',`;
+      //   sql+=`?'`+element.eq +`',`;
+      //   sql+=`?'`+element.at_param+`')`;
+
+      //   if(flag++<datas.length-1){
+      //     sql+=`,`;
+      //   }
+       
+      // });
+       
+      //console.log(sql);
+
+      const insert = this.demoSqliteDB.db.prepare(`INSERT INTO ${table} (at_key,eq,at_param) values (@at_key, @eq,@at_param)`);
+      console.log(datas);
+      const insertMany = this.demoSqliteDB.db.transaction((cats) => {
+        
+        for (const cat of cats) 
+          {
+            insert.run(cat);
+          }
+      });
+       
+      insertMany(datas);
+      return true;
+    }
+
   /*
    * 删 Test data (sqlite)
    */
@@ -249,7 +291,7 @@ class StorageService extends Service {
     let table = 'atlist801';
     await this.checkAndCreateATTableSqlite(table);
 
-    const updateUser = this.demoSqliteDB.db.prepare(`UPDATE ${table} SET at_key = @at_key,eq = @eq,at_param = @at_param WHERE at_key||eq||at_param = ?`);
+    const updateUser = this.demoSqliteDB.db.prepare(`UPDATE ${table} SET at_key = @at_key,eq = @eq,at_param = @at_param WHERE at_key||eq||at_param = @at_update`);
     updateUser.run(data);
 
     return true;

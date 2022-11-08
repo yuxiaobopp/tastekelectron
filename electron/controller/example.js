@@ -12,6 +12,8 @@ const {dialog, webContents, shell, BrowserWindow, BrowserView,
   Notification, powerMonitor, screen, nativeTheme} = require('electron');
 const autoLaunchManager = require('../library/autoLaunch');
 const dayjs = require('dayjs');
+var xlsx = require('node-xlsx').default;
+ 
 
 let myTimer = null;
 let browserViewObj = null;
@@ -46,7 +48,7 @@ class ExampleController extends Controller {
 
     return result;
   }
-
+ 
   /**
    * json数据库操作
    */   
@@ -135,10 +137,10 @@ class ExampleController extends Controller {
         data.result = await service.storage.addATSqlite(paramsObj.info);;
         break;
       case 'atdel' :
-        data.result = await service.storage.delATSqlite(paramsObj.delete_name);;
+        data.result = await service.storage.delATSqlite(paramsObj.at_del_key);;
         break;
       case 'atupdate' :
-        data.result = await service.storage.updateATSqlite(paramsObj.info);;
+        data.result = await service.storage.updateATSqlite(paramsObj.updateinfo);;
         break;
       case 'atget' :
         data.result =  await service.storage.getAllATDataSqlite(paramsObj.searchkey);
@@ -203,15 +205,40 @@ class ExampleController extends Controller {
   /**
    * 导入excel文件
    */
-   importExcel (filePath) {
-
+   async importExcel (filePath) {
+console.log(filePath);
     if (_.isEmpty(filePath)) {
       return false
     }
-
     
+    // Parse a buffer
+    //const workSheetsFromBuffer = xlsx.parse(fs.readFileSync(`${__dirname}/myFile.xlsx`));
+ 
+    const workSheetsFromBuffer = xlsx.parse(fs.readFileSync(filePath));
+    // Parse a file
+    // const workSheetsFromFile = xlsx.parse(`${__dirname}/myFile.xlsx`);
+    //const workSheetsFromFile = xlsx.parse(filePath);
+    
+    console.log(workSheetsFromBuffer);
+    let atlist=[];
+    //遍历导入sqlite3
+    let topIndex=0;//过滤表头
+    workSheetsFromBuffer[0].data.forEach(item=>{
+      if(topIndex++>0){
+        
+        atlist.push({
+          'at_key':item[0],
+          'eq':item[1],
+          'at_param':item[2],
+        });
+      }
+    });
 
-    return true;
+    const { service } = this;
+
+    let result = await service.storage.addBatchATSqlite(atlist);
+    
+    return result;
   } 
   /**
    * 打开目录
@@ -647,6 +674,17 @@ class ExampleController extends Controller {
     
     return data;
   }  
+  /**
+   * 同步消息类型
+   * @param args 前端传的参数
+   * @param event - IpcMainEvent 文档：https://www.electronjs.org/docs/latest/api/structures/ipc-main-event
+   */ 
+   async ipcATSendSyncMsg (args) {
+    let timeNow = dayjs().format('YYYY-MM-DD HH:mm:ss');
+    const data = args + ' - ' + timeNow;
+    
+    return data;
+  }  
 
   /**
    * 双向异步通信
@@ -674,6 +712,7 @@ class ExampleController extends Controller {
       return 'ohther'
     }
   }
+ 
 
   /**
    * 测试接口

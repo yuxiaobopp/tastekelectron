@@ -65,3 +65,7 @@ subMenu.js设置子菜单样式
   }
 如果不是.db的文件名 就 存到内存，否则存到.db文件
 
+
+---
+新增ipc方法的时候，要在ipcApiRoute 里面添加一条对应方法的属性 例如  importExcel: 'controller.example.importExcel',
+否则self.$ipcInvoke(ipcApiRoute.importExcel,path) 会报错

@@ -6,6 +6,8 @@ const ipcApiRoute = {
   messageShow: 'controller.example.messageShow',
   messageShowConfirm: 'controller.example.messageShowConfirm',
   selectFolder: 'controller.example.selectFolder',
+  importExcel: 'controller.example.importExcel',
+  devt:'controller.example.devt',
   openDirectory: 'controller.example.openDirectory',
   loadViewContent: 'controller.example.loadViewContent',
   removeViewContent: 'controller.example.removeViewContent',
@@ -28,6 +30,7 @@ const ipcApiRoute = {
   doSocketRequest: 'controller.example.doSocketRequest',
   ipcInvokeMsg: 'controller.example.ipcInvokeMsg',
   ipcSendSyncMsg: 'controller.example.ipcSendSyncMsg',
+  ipcATSendSyncMsg:'controller.example.ipcATSendSyncMsg',
   ipcSendMsg: 'controller.example.ipcSendMsg',
   hello: 'controller.example.hello',
 }

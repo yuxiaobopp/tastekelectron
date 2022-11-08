@@ -25,6 +25,53 @@
         </a-col>
       </a-row>
     </div>
+    <div class="one-block-1">
+      <span>
+        删除AT指令
+      </span>
+    </div>  
+    <div class="one-block-2">
+      <a-row>
+        <a-col :span="16">
+          <a-input v-model="at_del_key" :value="at_del_key" addon-before="指令" />
+        </a-col>
+       
+        <a-col :span="6">
+          <a-button @click="atsqlitedbOperation('atdel')">
+            删除
+          </a-button>
+        </a-col>
+      </a-row>
+    </div>
+
+    <div class="one-block-1">
+      <span>
+        修改AT指令
+      </span>
+    </div>  
+    <div class="one-block-2">
+    
+      <a-row :gutter="[16,16]">
+        <a-col :span="32">
+          <a-input v-model="at_update" :value="at_update" addon-before="原AT指令" />
+        </a-col>
+        <a-col :span="8">
+          <a-input v-model="at_key_update" :value="at_key_update" addon-before="新AT前缀" />
+        </a-col>
+        <a-col :span="8">
+          <a-input v-model="eq_update" :value="eq_update" addon-before="新AT连接符号"/>
+        </a-col>
+        <a-col :span="8">
+          <a-input v-model="at_param_update" :value="at_param_update" addon-before="新AT参数"/>
+        </a-col>
+       
+        <a-col :span="6">
+          <a-button @click="atsqlitedbOperation('atupdate')">
+            确认修改
+          </a-button>
+        </a-col>
+      </a-row>
+    </div>
 
     <div class="one-block-1">
       <span>
@@ -34,7 +81,7 @@
     <div class="one-block-2">
       <a-row>
         <a-col :span="16">
-          <a-input v-model="at_search_key" :value="at_key" addon-before="关键字" />
+          <a-input v-model="at_search_key" :value="at_search_key" addon-before="关键字" />
         </a-col>
        
         <a-col :span="6">
@@ -76,6 +123,9 @@
       </a-row>
     </div>
 
+    <div>
+      <a-button @click="test">开发者工具</a-button>
+    </div>
   </div>
  
 </template>
@@ -84,19 +134,26 @@ import { ipcApiRoute } from '@/api/main'
 export default {
   data() {
     return {
-      atList: ['空'],
-      at_key:null,
-      at_param:null,
-      eq:'=',
-      at_search_key:'',
-      dir_path: "/temp",
+      atList: ['空'],//返回结果集
+      at_key:null,//指令前缀
+      at_param:null,//参数不
+      eq:'=',//连接符号 =,?,=?三种
+      at_search_key:'',//查询指令
+      dir_path: ``,//导入excel文件
+      at_del_key:'',//删除
+      at_update:''//更新
     };
   },
   mounted () {
     this.getAllTestData();
   },
   methods: {
+    handleaATSendSync () {
+    },
     test () {
+      console.log("++");
+      const msg = this.$ipcSendSync(ipcApiRoute.ipcATSendSyncMsg, 'AT');
+      console.log(msg);
     },
     getAllTestData () {
       const self = this;
@@ -110,7 +167,7 @@ export default {
           return false;
         }
         self.atList = res.atList;
-      }) 
+      }); 
     },
     atsqlitedbOperation (ac) {
       const self = this;
@@ -122,11 +179,26 @@ export default {
           at_param: this.at_param
         },
         searchkey:this.at_search_key,
-        update_at: this.at_key+this.eq+this.at_param,
-        delete_at: this.at_key+this.eq+this.at_param,
+        at_del_key:this.at_del_key,
+        
+        updateinfo:{
+          at_update:this.at_update,
+          at_key_update:this.at_key_update,
+          eq_update:this.eq_update,
+          at_param_update:this.at_param_update,
+        }
       }
       if (ac == 'atadd' && (this.at_key ==null||this.at_key.length == 0) ) {
-        self.$message.error(`请填写数据`);
+        self.$message.error(`请输入要添加的指令内容`);
+        return;
+      }
+      if (ac == 'atdel' && (this.at_del_key ==null||this.at_del_key.length == 0) ) {
+        self.$message.error(`请输入要删除的指令`);
+        return;
+      }
+
+      if (ac == 'atupdate' && (this.at_update_key ==null||this.at_del_key.length == 0) ) {
+        self.$message.error(`请输入要修改的指令内容`);
         return;
       }
       console.log(params);
@@ -141,10 +213,19 @@ export default {
           self.$message.error(`添加失败`);
           return;
         }
-        
+        if (ac == 'atdel'){
+          if (res.result) {
+            self.$message.success(`删除成功`);
+            return;
+          }
+
+          self.$message.error(`删除失败`);
+          return;
+        }
         if (ac == 'atget') {
           if (res.result.length == 0) {
             self.$message.error(`没有数据`);
+            self.atList = ['空'];
             return;
           }
           
@@ -166,28 +247,30 @@ export default {
       }).catch(err=>{
         console.log(err);
         self.$message.error(`操作失败`);
-      }) ;
+      });
     },
     selectDir() {
       const self = this;
       self.$ipcInvoke(ipcApiRoute.selectFolder, '').then(r => {
         self.dir_path = r;
         self.$message.info(r);
-      })      
+      });      
     },
     importAT(){
       const self=this;
-      self.$ipcInvoke(ipcApiRoute.importExcel,self.dir_path).then(r=>{
-        console.log(self.dir_path);
+      const path=self.dir_path;
+    
+      self.$ipcInvoke(ipcApiRoute.importExcel,path).then(r=>{
+        console.log(path);
         console.log(r);
-        if(r==true){
+        if(r){
 
           self.$message.success('成功');
           return;
         }
         
-        self.$message.error('导入失败')
-      })
+        self.$message.error('导入失败');
+      });
     }
   }
 };

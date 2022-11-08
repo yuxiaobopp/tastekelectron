@@ -99,6 +99,7 @@ export default {
       const msg = this.$ipcSendSync(ipcApiRoute.ipcSendSyncMsg, '同步');
       this.message3 = msg;
     },
+    
   }
 }
 </script>
