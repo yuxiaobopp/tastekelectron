@@ -2,7 +2,7 @@
  * 基础路由
  * @type { *[] }
  */
-import {AppSider, Menu} from '@/layouts'
+import { AppSider, Menu } from '@/layouts'
 
 export const constantRouterMap = [
   {
@@ -65,7 +65,7 @@ export const constantRouterMap = [
             path: '/base/theme/index',
             name: 'BaseThemeIndex',
             component: () => import('@/views/base/theme/Index')
-          },                               
+          },
           {
             path: '/base/software/index',
             name: 'BaseSoftwareIndex',
@@ -80,7 +80,7 @@ export const constantRouterMap = [
             path: '/base/socket/socketserver',
             name: 'BaseSocketSocketServer',
             component: () => import('@/views/base/socket/SocketServer')
-          },          
+          },
           {
             path: '/base/system/index',
             name: 'BaseSystemIndex',
@@ -95,15 +95,15 @@ export const constantRouterMap = [
             path: '/base/updater/index',
             name: 'BaseUpdaterIndex',
             component: () => import('@/views/base/updater/Index')
-          },  
-        ]  
+          },
+        ]
       },
       {
         path: '/other',
         name: 'Other',
         component: Menu,
         props: { id: 'other' },
-        redirect: { name: 'OtherInitATIndex' },
+        redirect: { name: 'OtherTestIndex' },//默认跳转子菜单
         children: [
           {
             path: '/other/test/index',
@@ -115,7 +115,7 @@ export const constantRouterMap = [
             name: 'OtherInitATIndex',
             component: () => import('@/views/other/initAT/Index')
           },
-        ] 
+        ]
       }
     ]
   }

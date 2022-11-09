@@ -1,10 +1,6 @@
 <template>
   <a-layout id="app-layout-sider">
-    <a-layout-sider
-      v-model="collapsed"
-      theme="light"
-      class="layout-sider"
-    >
+    <a-layout-sider v-model="collapsed" theme="light" class="layout-sider">
       <div class="logo">
         <img class="pic-logo" src="~@/assets/logo.png">
       </div>
@@ -28,35 +24,35 @@ export default {
   data() {
     return {
       collapsed: true,
-      default_key: 'menu_1',
+      default_key: 'menu_2',//默认打开菜单
       current: '',
       menu: {
-        'menu_1' : {
+        'menu_1': {
           icon: 'home',
           title: '框架',
           pageName: 'Base',
           params: {},
         },
-        'menu_2' : {
+        'menu_2': {
           icon: 'desktop',
-          title: '其它',
+          title: '示例',
           pageName: 'Other',
           params: {},
-        },              
+        },
       }
     };
   },
-  created () {
+  created() {
   },
-  mounted () {
+  mounted() {
     this.menuHandle()
   },
   methods: {
-    menuHandle (e) {
+    menuHandle(e) {
       this.current = e ? e.key : this.default_key;
       const linkInfo = this.menu[this.current]
       console.log('[home] load page:', linkInfo.pageName);
-      this.$router.push({ name: linkInfo.pageName, params: linkInfo.params})
+      this.$router.push({ name: linkInfo.pageName, params: linkInfo.params })
     },
   },
 };
@@ -65,18 +61,22 @@ export default {
 // 嵌套
 #app-layout-sider {
   height: 100%;
+
   .logo {
     border-bottom: 1px solid #e8e8e8;
   }
+
   .pic-logo {
     height: 32px;
     //background: rgba(139, 137, 137, 0.2);
     margin: 10px;
   }
+
   .layout-sider {
     border-top: 1px solid #e8e8e8;
     border-right: 1px solid #e8e8e8;
   }
+
   .menu-item {
     .ant-menu-item {
       background-color: #fff;
@@ -85,6 +85,7 @@ export default {
       padding: 0 0px !important;
     }
   }
+
   .layout-content {
     //background-color: #fff;
   }
