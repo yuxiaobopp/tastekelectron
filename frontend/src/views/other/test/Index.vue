@@ -65,7 +65,8 @@
   </div>
 </template>
 <script>
-
+import Vue from 'vue';
+import { ipcApiRoute } from '@/api/main'
 export default {
   data() {
     return {
@@ -97,9 +98,23 @@ export default {
   computed: {
 
   },
+  mounted() {
+    this.initSerialPort();
+  },
+
   methods: {
+    initSerialPort() {
+      this.$ipcInvoke(ipcApiRoute.initSerialPort, this.form).then(res => {
+        console.log('res:', res);
+      });
+    },
     onSubmit() {
       console.log('submit!', this.form);
+      // this.$ipcInvoke(ipcApiRoute.listSerialPort, this.form).then(res => {
+      //   console.log('res:', res);
+      // });
+
+      Vue.prototype.$ipc.sendSync('list_serial');
     },
   }
 };

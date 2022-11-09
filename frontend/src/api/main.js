@@ -7,7 +7,7 @@ const ipcApiRoute = {
   messageShowConfirm: 'controller.example.messageShowConfirm',
   selectFolder: 'controller.example.selectFolder',
   importExcel: 'controller.example.importExcel',
-  devt:'controller.example.devt',
+  devt: 'controller.example.devt',
   openDirectory: 'controller.example.openDirectory',
   loadViewContent: 'controller.example.loadViewContent',
   removeViewContent: 'controller.example.removeViewContent',
@@ -15,7 +15,7 @@ const ipcApiRoute = {
   sendNotification: 'controller.example.sendNotification',
   initPowerMonitor: 'controller.example.initPowerMonitor',
   getScreen: 'controller.example.getScreen',
-  openSoftware: 'controller.example.openSoftware', 
+  openSoftware: 'controller.example.openSoftware',
   autoLaunch: 'controller.example.autoLaunch',
   setTheme: 'controller.example.setTheme',
   getTheme: 'controller.example.getTheme',
@@ -30,9 +30,11 @@ const ipcApiRoute = {
   doSocketRequest: 'controller.example.doSocketRequest',
   ipcInvokeMsg: 'controller.example.ipcInvokeMsg',
   ipcSendSyncMsg: 'controller.example.ipcSendSyncMsg',
-  ipcATSendSyncMsg:'controller.example.ipcATSendSyncMsg',
+  ipcATSendSyncMsg: 'controller.example.ipcATSendSyncMsg',
   ipcSendMsg: 'controller.example.ipcSendMsg',
   hello: 'controller.example.hello',
+  initSerialPort: 'controller.example.initSerialPort',
+  listSerialPort: 'controller.example.listSerialPort',
 }
 
 const specialIpcRoute = {
@@ -51,7 +53,7 @@ const requestHttp = (uri, parameter) => {
   console.log('url:', url);
   return request({
     url: url,
-    method: 'post', 
+    method: 'post',
     data: parameter, // body
     params: {}, // URL 参数
     timeout: 60000,

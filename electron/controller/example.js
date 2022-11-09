@@ -8,13 +8,15 @@ const { exec } = require('child_process');
 const Controller = require('ee-core').Controller;
 const Utils = require('ee-core').Utils;
 const electronApp = require('electron').app;
-const {dialog, webContents, shell, BrowserWindow, BrowserView, 
-  Notification, powerMonitor, screen, nativeTheme} = require('electron');
+const { dialog, webContents, shell, BrowserWindow, BrowserView,
+  Notification, powerMonitor, screen, nativeTheme, ipcMain } = require('electron');
 const autoLaunchManager = require('../library/autoLaunch');
 const dayjs = require('dayjs');
+//excel操作
 var xlsx = require('node-xlsx').default;
- 
-
+//获取serialport实例
+const { SerialPort } = require('serialport');
+//const { ipc } = require('child_process');
 let myTimer = null;
 let browserViewObj = null;
 let notificationObj = null;
@@ -38,7 +40,7 @@ class ExampleController extends Controller {
   /**
    * test
    */
-  async test () {
+  async test() {
     const result = await this.service.example.test('electron');
 
     let tmpDir = Utils.getLogDir();
@@ -48,10 +50,43 @@ class ExampleController extends Controller {
 
     return result;
   }
- 
+  async listSerialPort(data) {
+    //window.electron.ipcRenderer.sendSync('list_serial');
+  }
+  async initSerialPort(data) {
+    console.log('initSerialPort');
+    //查找串口
+    ipcMain.on('list_serial', (event, arg) => {
+      console.log('list_serial');
+      console.log(arg);
+      console.log(event);
+      //list uart
+      SerialPort.list().then((ports, err) => {
+        console.log('SerialPort.list()');
+        console.log(ports);
+        console.log(err);
+        if (err) {
+          //向renderer.js发送uart error信号
+          this.app.electron.mainWindow.webContents.send('seiral_list_error', err.message)
+          return err.message;
+        } else {
+          //list success   
+          console.log('ports', ports);
+          if (ports.length === 0) {
+            //没有任何串口
+            this.app.electron.mainWindow.webContents.send('serial_list_error', "no uart")
+          } else {
+            //发送串口数据到renderer.js
+            this.app.electron.mainWindow.webContents.send('serial_list_success', ports)
+          }
+        }
+      });
+    });
+    return 'initSerialPort ok';
+  }
   /**
    * json数据库操作
-   */   
+   */
   async dbOperation(args) {
     const { service } = this;
     const paramsObj = args;
@@ -61,18 +96,18 @@ class ExampleController extends Controller {
       result: null,
       all_list: []
     };
-    
+
     switch (paramsObj.action) {
-      case 'add' :
+      case 'add':
         data.result = await service.storage.addTestData(paramsObj.info);;
         break;
-      case 'del' :
+      case 'del':
         data.result = await service.storage.delTestData(paramsObj.delete_name);;
         break;
-      case 'update' :
+      case 'update':
         data.result = await service.storage.updateTestData(paramsObj.update_name, paramsObj.update_age);
         break;
-      case 'get' :
+      case 'get':
         data.result = await service.storage.getTestData(paramsObj.search_age);
         break;
     }
@@ -84,7 +119,7 @@ class ExampleController extends Controller {
 
   /**
    * sqlite数据库操作
-   */   
+   */
   async sqlitedbOperation(args) {
     const { service } = this;
     const paramsObj = args;
@@ -94,22 +129,22 @@ class ExampleController extends Controller {
       result: null,
       all_list: []
     };
-    
+
     switch (paramsObj.action) {
-      case 'add' :
+      case 'add':
         data.result = await service.storage.addTestDataSqlite(paramsObj.info);;
         break;
-     
-      case 'del' :
+
+      case 'del':
         data.result = await service.storage.delTestDataSqlite(paramsObj.delete_name);;
         break;
-      case 'delat' :
+      case 'delat':
         data.result = await service.storage.delATSqlite(paramsObj.delete_name);;
         break;
-      case 'update' :
+      case 'update':
         data.result = await service.storage.updateTestDataSqlite(paramsObj.update_name, paramsObj.update_age);
         break;
-      case 'get' :
+      case 'get':
         data.result = await service.storage.getTestDataSqlite(paramsObj.search_age);
         break;
     }
@@ -120,8 +155,8 @@ class ExampleController extends Controller {
 
   /**
    * sqlite数据库操作
-   */   
-   async atsqlitedbOperation(args) {
+   */
+  async atsqlitedbOperation(args) {
     const { service } = this;
     const paramsObj = args;
     console.log('eeeee paramsObj:', paramsObj);
@@ -130,48 +165,48 @@ class ExampleController extends Controller {
       result: null,
       atList: []
     };
-    
+
     switch (paramsObj.action) {
-      
-      case 'atadd' :
+
+      case 'atadd':
         data.result = await service.storage.addATSqlite(paramsObj.info);;
         break;
-      case 'atdel' :
+      case 'atdel':
         data.result = await service.storage.delATSqlite(paramsObj.at_del_key);;
         break;
-      case 'atupdate' :
+      case 'atupdate':
         data.result = await service.storage.updateATSqlite(paramsObj.updateinfo);;
         break;
-      case 'atget' :
-        data.result =  await service.storage.getAllATDataSqlite(paramsObj.searchkey);
+      case 'atget':
+        data.result = await service.storage.getAllATDataSqlite(paramsObj.searchkey);
         break;
-      case 'atgetall' :
-        data.atList =  await service.storage.getAllATDataSqlite(paramsObj.searchkey);
+      case 'atgetall':
+        data.atList = await service.storage.getAllATDataSqlite(paramsObj.searchkey);
         break;
     }
 
-    data.atList =  await service.storage.getAllATDataSqlite(paramsObj.searchkey);
+    data.atList = await service.storage.getAllATDataSqlite(paramsObj.searchkey);
     return data;
   }
 
   /**
    * 消息提示对话框
    */
-  messageShow () {
+  messageShow() {
     dialog.showMessageBoxSync({
       type: 'info', // "none", "info", "error", "question" 或者 "warning"
       title: '自定义标题-message',
       message: '自定义消息内容',
       detail: '其它的额外信息'
     })
-  
+
     return '打开了消息框';
   }
 
   /**
    * 消息提示与确认对话框
    */
-  messageShowConfirm () {
+  messageShowConfirm() {
     const res = dialog.showMessageBoxSync({
       type: 'info',
       title: '自定义标题-message',
@@ -182,17 +217,17 @@ class ExampleController extends Controller {
       buttons: ['确认', '取消'], // 按钮及索引
     })
     let data = (res === 0) ? '点击确认按钮' : '点击取消按钮';
-  
+
     return data;
   }
 
   /**
    * 选择目录
    */
-  selectFolder () {
+  selectFolder() {
     const filePaths = dialog.showOpenDialogSync({
-      title:'请选择文件',
-      properties: ['createDirectory','openFile','multiSelections','showHiddenFiles','promptToCreate','dontAddToRecent']
+      title: '请选择文件',
+      properties: ['createDirectory', 'openFile', 'multiSelections', 'showHiddenFiles', 'promptToCreate', 'dontAddToRecent']
     });
 
     if (_.isEmpty(filePaths)) {
@@ -200,36 +235,36 @@ class ExampleController extends Controller {
     }
 
     return filePaths[0];
-  } 
+  }
 
   /**
    * 导入excel文件
    */
-   async importExcel (filePath) {
-console.log(filePath);
+  async importExcel(filePath) {
+    console.log(filePath);
     if (_.isEmpty(filePath)) {
       return false
     }
-    
+
     // Parse a buffer
     //const workSheetsFromBuffer = xlsx.parse(fs.readFileSync(`${__dirname}/myFile.xlsx`));
- 
+
     const workSheetsFromBuffer = xlsx.parse(fs.readFileSync(filePath));
     // Parse a file
     // const workSheetsFromFile = xlsx.parse(`${__dirname}/myFile.xlsx`);
     //const workSheetsFromFile = xlsx.parse(filePath);
-    
+
     console.log(workSheetsFromBuffer);
-    let atlist=[];
+    let atlist = [];
     //遍历导入sqlite3
-    let topIndex=0;//过滤表头
-    workSheetsFromBuffer[0].data.forEach(item=>{
-      if(topIndex++>0){
-        
+    let topIndex = 0;//过滤表头
+    workSheetsFromBuffer[0].data.forEach(item => {
+      if (topIndex++ > 0) {
+
         atlist.push({
-          'at_key':item[0],
-          'eq':item[1],
-          'at_param':item[2],
+          'at_key': item[0],
+          'eq': item[1],
+          'at_param': item[2],
         });
       }
     });
@@ -237,13 +272,13 @@ console.log(filePath);
     const { service } = this;
 
     let result = await service.storage.addBatchATSqlite(atlist);
-    
+
     return result;
-  } 
+  }
   /**
    * 打开目录
    */
-  openDirectory (args) {
+  openDirectory(args) {
     if (!args.id) {
       return false;
     }
@@ -255,7 +290,7 @@ console.log(filePath);
   /**
    * 加载视图内容
    */
-  loadViewContent (args) {
+  loadViewContent(args) {
     let content = null;
     if (args.type == 'html') {
       content = path.join('file://', electronApp.getAppPath(), args.content)
@@ -278,15 +313,15 @@ console.log(filePath);
   /**
    * 移除视图内容
    */
-  removeViewContent () {
+  removeViewContent() {
     this.app.electron.mainWindow.removeBrowserView(browserViewObj);
     return true
-  }  
+  }
 
   /**
    * 打开新窗口
    */
-  createWindow (args) {
+  createWindow(args) {
     let content = null;
     if (args.type == 'html') {
       content = path.join('file://', electronApp.getAppPath(), args.content)
@@ -297,14 +332,14 @@ console.log(filePath);
     let winObj = new BrowserWindow({
       x: 10,
       y: 10,
-      width: 980, 
-      height: 650 
+      width: 980,
+      height: 650
     })
     winObj.loadURL(content);
 
     return winObj.id
   }
-  
+
   /**
    * 加载扩展程序
    */
@@ -329,7 +364,7 @@ console.log(filePath);
   /**
    * 创建系统通知
    */
-  sendNotification (arg, event) {
+  sendNotification(arg, event) {
     const channel = 'controller.example.sendNotification';
     if (!Notification.isSupported()) {
       return '当前系统不支持通知';
@@ -374,12 +409,12 @@ console.log(filePath);
     notificationObj.show();
 
     return true
-  }  
+  }
 
   /**
    * 电源监控
    */
-  initPowerMonitor (arg, event) {
+  initPowerMonitor(arg, event) {
     const channel = 'controller.example.initPowerMonitor';
     powerMonitor.on('on-ac', (e) => {
       let data = {
@@ -414,12 +449,12 @@ console.log(filePath);
     });
 
     return true
-  }  
+  }
 
   /**
    * 获取屏幕信息
    */
-  getScreen (arg) {
+  getScreen(arg) {
     let data = [];
     let res = {};
     if (arg == 0) {
@@ -434,7 +469,7 @@ console.log(filePath);
           desc: res.y
         },
       ]
-      
+
       return data;
     }
     if (arg == 1) {
@@ -457,7 +492,7 @@ console.log(filePath);
       },
       {
         title: '色深',
-        desc: res. colorDepth
+        desc: res.colorDepth
       },
       {
         title: '色域',
@@ -478,12 +513,12 @@ console.log(filePath);
     ]
 
     return data;
-  }  
+  }
 
   /**
    * 调用其它程序（exe、bash等可执行程序）
    */
-  openSoftware (softName) {
+  openSoftware(softName) {
     if (!softName) {
       return false;
     }
@@ -500,12 +535,12 @@ console.log(filePath);
     exec(cmdStr);
 
     return true;
-  }  
+  }
 
   /**
    * 开机启动-开启
    */
-  autoLaunch (type) {
+  autoLaunch(type) {
     console.log('type:', type);
     let res = {
       type: type,
@@ -527,7 +562,7 @@ console.log(filePath);
   /**
    * 获取系统主题
    */
-  getTheme () {
+  getTheme() {
     let theme = 'system';
     if (nativeTheme.shouldUseHighContrastColors) {
       theme = 'light';
@@ -541,7 +576,7 @@ console.log(filePath);
   /**
    * 设置系统主题
    */
-  setTheme (args) {
+  setTheme(args) {
 
     // TODO 好像没有什么明显效果
     nativeTheme.themeSource = args;
@@ -553,12 +588,12 @@ console.log(filePath);
   /**
    * 检查是否有新版本
    */
-  checkForUpdater () {
+  checkForUpdater() {
     const config = this.app.config.autoUpdate;
-    if ( (is.windows() && config.windows) || (is.macOS() && config.macOS) || (is.linux() && config.linux) ) {
+    if ((is.windows() && config.windows) || (is.macOS() && config.macOS) || (is.linux() && config.linux)) {
       const autoUpdater = require('../library/autoUpdater');
       autoUpdater.checkUpdate();
-    }    
+    }
 
     return;
   }
@@ -566,18 +601,18 @@ console.log(filePath);
   /**
    * 下载新版本
    */
-  downloadApp () {
+  downloadApp() {
     const config = this.app.config.autoUpdate;
-    if ( (is.windows() && config.windows) || (is.macOS() && config.macOS) || (is.linux() && config.linux) ) {
+    if ((is.windows() && config.windows) || (is.macOS() && config.macOS) || (is.linux() && config.linux)) {
       const autoUpdater = require('../library/autoUpdater');
       autoUpdater.download();
-    }  
+    }
     return;
   }
 
   /**
    * 上传文件
-   */  
+   */
   async uploadFile() {
     // const self = this;
     // const { ctx, service } = this;
@@ -598,8 +633,8 @@ console.log(filePath);
 
   /**
    * 检测http服务是否开启
-   */ 
-  async checkHttpServer () {
+   */
+  async checkHttpServer() {
     const httpServerConfig = this.app.config.httpServer;
     const url = httpServerConfig.protocol + httpServerConfig.host + ':' + httpServerConfig.port;
 
@@ -612,8 +647,8 @@ console.log(filePath);
 
   /**
    * 一个http请求访问此方法
-   */ 
-  async doHttpRequest () {
+   */
+  async doHttpRequest() {
     // http方法
     const method = this.app.request.method;
     // http get 参数
@@ -634,71 +669,71 @@ console.log(filePath);
     }
     const dir = electronApp.getPath(body.id);
     shell.openPath(dir);
-    
+
     return true;
-  } 
- 
+  }
+
   /**
    * 一个socket io请求访问此方法
-   */ 
-  async doSocketRequest (args) {
+   */
+  async doSocketRequest(args) {
     if (!args.id) {
       return false;
     }
     const dir = electronApp.getPath(args.id);
     shell.openPath(dir);
-    
+
     return true;
   }
-  
+
   /**
    * 异步消息类型
    * @param args 前端传的参数
    * @param event - IpcMainInvokeEvent 文档：https://www.electronjs.org/zh/docs/latest/api/structures/ipc-main-invoke-event
-   */ 
-   async ipcInvokeMsg (args, event) {
+   */
+  async ipcInvokeMsg(args, event) {
     let timeNow = dayjs().format('YYYY-MM-DD HH:mm:ss');
     const data = args + ' - ' + timeNow;
-    
+
     return data;
-  }  
+  }
 
   /**
    * 同步消息类型
    * @param args 前端传的参数
    * @param event - IpcMainEvent 文档：https://www.electronjs.org/docs/latest/api/structures/ipc-main-event
-   */ 
-  async ipcSendSyncMsg (args) {
+   */
+  async ipcSendSyncMsg(args) {
     let timeNow = dayjs().format('YYYY-MM-DD HH:mm:ss');
     const data = args + ' - ' + timeNow;
-    
+
     return data;
-  }  
+  }
   /**
    * 同步消息类型
    * @param args 前端传的参数
    * @param event - IpcMainEvent 文档：https://www.electronjs.org/docs/latest/api/structures/ipc-main-event
-   */ 
-   async ipcATSendSyncMsg (args) {
+   */
+  async ipcATSendSyncMsg(args) {
     let timeNow = dayjs().format('YYYY-MM-DD HH:mm:ss');
     const data = args + ' - ' + timeNow;
-    
+
     return data;
-  }  
+  }
 
   /**
    * 双向异步通信
    * @param args 前端传的参数
    * @param event - IpcMainEvent 文档：https://www.electronjs.org/docs/latest/api/structures/ipc-main-event
    */
-  ipcSendMsg (args, event) {
+  ipcSendMsg(args, event) {
     // 前端ipc频道 channel
     const channel = 'controller.example.ipcSendMsg';
 
     if (args.type == 'start') {
       // 每隔1秒，向前端页面发送消息
       // 用定时器模拟
-      myTimer = setInterval(function(e, c, msg) {
+      myTimer = setInterval(function (e, c, msg) {
         let timeNow = Date.now();
         let data = msg + ':' + timeNow;
         e.reply(`${c}`, data)
@@ -707,19 +742,19 @@ console.log(filePath);
       return '开始了'
     } else if (args.type == 'end') {
       clearInterval(myTimer);
-      return '停止了'    
+      return '停止了'
     } else {
       return 'ohther'
     }
   }
- 
+
 
   /**
    * 测试接口
-   */ 
-  hello (args) {
+   */
+  hello(args) {
     console.log('hello ', args);
-  }   
+  }
 }
 
 ExampleController.toString = () => '[class ExampleController]';
