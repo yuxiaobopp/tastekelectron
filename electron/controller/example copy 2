@@ -54,57 +54,65 @@ class ExampleController extends Controller {
   async listSerialPort(data) {
     //window.electron.ipcRenderer.sendSync('list_serial');
   }
+  
+  initSerialPort(data, event) {
+    const channel = 'controller.example.initSerialPort';
+    console.log('data=' + data);
+    //查找串口
+    /*
+    ipcMain.on('list_serial', (event, arg) => {
+      console.log('list_serial');
+      console.log(arg);
+      console.log(event);
+      //list uart
+      SerialPort.list().then((ports, err) => {
+        console.log('SerialPort.list()');
+        console.log(ports);
+        console.log(err);
+        if (err) {
+          //向renderer.js发送uart error信号
+          return err.message;
+        } else {
+          //list success   
+          console.log('ports', ports);
 
-  /**
-   * 创建系统通知
-   */
-  initSerialPort(arg, event) {
+          if (ports.length === 0) {
+            //没有任何串口
+            return [];
+          } else {
+            //发送串口数据到renderer.js
+            console.log(this);
+            console.log(ipcMain);
+            //ipcMain.webContents.send('serial_list_success', ports)
+            return ports;
+          }
+        }
+      });
+    });
+    */
+    //list uart
     SerialPort.list().then((ports, err) => {
       if (err) {
         //向renderer.js发送uart error信号
         return err.message;
       } else {
         //list success   
+        console.log('ports', ports);
+
         if (ports.length === 0) {
           //没有任何串口
           return [];
         } else {
           //发送串口数据到renderer.js
+          console.log(event);
           event.reply('controller.example.initSerialPort', ports)
+          //ipcMain.webContents.send('serial_list_success', ports)
           return ports;
         }
       }
     });
-
-    //绑定打开和关闭串口事件
-    ipcMain.on('open_serial', (event, arg) => {
-      console.log(arg);
-      console.log('---');
-      console.log(arg.comport);
-      let OpenPort = new SerialPort({
-        path: arg.comport,
-        baudRate: 9600,//Number(arg.combaud),
-        dataBits: 8,//Number(arg.comdata),
-        parity: 'none',//arg.comparity,
-        stopBits: 1//Number(arg.comstop)
-      }, function (err) {
-        if (err) {
-          console.log('open serial error: ', err.message)
-          event.reply('serial_open_error', err.message);
-          return;
-        }
-
-        event.reply('open_serial_success', arg);
-      });
-
-    });
-
-    ipcMain.on('close_serial', (event, arg) => {
-      event.reply('close_serial_success', arg);
-    });
-    return true
+    //return 'initSerialPort ok';
   }
-
   /**
    * json数据库操作
    */

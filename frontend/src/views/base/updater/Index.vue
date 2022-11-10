@@ -41,6 +41,7 @@ export default {
   methods: {
     init () {
       const self = this;
+      console.log(this.$ipc)
       this.$ipc.removeAllListeners(specialIpcRoute.appUpdater);
       this.$ipc.on(specialIpcRoute.appUpdater, (event, result) => {
         result = JSON.parse(result);

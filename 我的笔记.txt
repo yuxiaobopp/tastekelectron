@@ -69,3 +69,20 @@ subMenu.js设置子菜单样式
 ---
 新增ipc方法的时候，要在ipcApiRoute 里面添加一条对应方法的属性 例如  importExcel: 'controller.example.importExcel',
 否则self.$ipcInvoke(ipcApiRoute.importExcel,path) 会报错
+
+
+---
+热重载
+frontend 开起来，端口号记录下比如8080
+主进程修改端口
+  config.mainServer = {
+    host: '127.0.0.1',
+    port: 8080
+  };
+主进程端开起来
+----
+前端渲染进程和主进程通信
+同步：
+比如sendNotification（参数，回调）
+回调里面可以监听主进程处理好的结果
+回调函数传给主进程，回调函数可以reply('渲染进程监听的channel',主进程处理结果)

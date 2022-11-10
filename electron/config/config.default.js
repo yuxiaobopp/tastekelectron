@@ -53,9 +53,9 @@ module.exports = (appInfo) => {
     minHeight: 650,
     webPreferences: {
       //webSecurity: false,
-      contextIsolation: true, // false->可在渲染进程中使用electronApi，true->需要bridge.js(contextBridge)
+      contextIsolation: false, // false->可在渲染进程中使用electronApi，true->需要bridge.js(contextBridge)//调试串口时候改成true了
       nodeIntegration: true,
-      preload: path.join(appInfo.baseDir, 'preload', 'bridge.js'),
+      //preload: path.join(appInfo.baseDir, 'preload', 'bridge.js'),//调试串口时候取消注释了
     },
     frame: true,
     show: true,
@@ -119,7 +119,7 @@ module.exports = (appInfo) => {
   /* 主进程 */
   config.mainServer = {
     host: '127.0.0.1',
-    port: 7072, // 默认端口（如果端口被使用，则随机获取一个）
+    port: 8080//7072, // 默认端口（如果端口被使用，则随机获取一个）
   };
 
   /**

@@ -15,7 +15,7 @@ const invoke = (channel, param) => {
  * 发送同步消息（send/on 模型）
  * @param channel
  * @param param
- * @returns {Any}
+ * @returns {Any}ipcSendMsg
  */
 const sendSync = (channel, param) => {
   const message = ipc.sendSync(channel, param);

@@ -38,7 +38,8 @@ const ipcApiRoute = {
 }
 
 const specialIpcRoute = {
-  appUpdater: 'app.updater' // 此频道在后端也有相同定义
+  appUpdater: 'app.updater', // 此频道在后端也有相同定义
+  serial_list_success: 'serial_list_success'
 }
 
 /**
