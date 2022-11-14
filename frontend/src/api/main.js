@@ -23,7 +23,6 @@ const ipcApiRoute = {
   downloadApp: 'controller.example.downloadApp',
   dbOperation: 'controller.example.dbOperation',
   sqlitedbOperation: 'controller.example.sqlitedbOperation',
-  atsqlitedbOperation: 'controller.example.atsqlitedbOperation',
   uploadFile: 'controller.example.uploadFile',
   checkHttpServer: 'controller.example.checkHttpServer',
   doHttpRequest: 'controller.example.doHttpRequest',
@@ -33,13 +32,10 @@ const ipcApiRoute = {
   ipcATSendSyncMsg: 'controller.example.ipcATSendSyncMsg',
   ipcSendMsg: 'controller.example.ipcSendMsg',
   hello: 'controller.example.hello',
-  initSerialPort: 'controller.example.initSerialPort',
-  listSerialPort: 'controller.example.listSerialPort',
 }
-
+//双向通信频道
 const specialIpcRoute = {
   appUpdater: 'app.updater', // 此频道在后端也有相同定义
-  serial_list_success: 'serial_list_success'
 }
 
 /**

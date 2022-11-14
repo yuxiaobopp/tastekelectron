@@ -16,7 +16,7 @@ const dayjs = require('dayjs');
 var xlsx = require('node-xlsx').default;
 //获取serialport实例
 const { SerialPort } = require('serialport');
-
+const { tastekIpcApiRoute, tastekSpecialIpcRoute } = require('../../frontend/src/api/special');
 //const { ipc } = require('child_process');
 let myTimer = null;
 let browserViewObj = null;
@@ -30,6 +30,7 @@ class ExampleController extends Controller {
 
   constructor(ctx) {
     super(ctx);
+    // this.OpenPort = null;
   }
 
   /**
@@ -51,17 +52,20 @@ class ExampleController extends Controller {
 
     return result;
   }
-  async listSerialPort(data) {
-    //window.electron.ipcRenderer.sendSync('list_serial');
-  }
 
   /**
-   * 创建系统通知
+   * 串口操作
    */
+  //打开串口
+
   initSerialPort(arg, event) {
+    const self = this;
+    self.app.logger.info('[initSerialPort] arg:', arg);
+    //list是异步方法，执行完毕之后会再发一次结果给前端
     SerialPort.list().then((ports, err) => {
       if (err) {
         //向renderer.js发送uart error信号
+        self.app.logger.err('[SerialPort.list()] err:', err.message);
         return err.message;
       } else {
         //list success   
@@ -70,38 +74,65 @@ class ExampleController extends Controller {
           return [];
         } else {
           //发送串口数据到renderer.js
-          event.reply('controller.example.initSerialPort', ports)
+          event.reply(tastekIpcApiRoute.initSerialPort, ports)
           return ports;
         }
       }
     });
 
+    if (global.OpenPort != null) {
+      console.log('串口已经加载过');
+      return;
+    }
+    ipcMain.removeAllListeners(tastekSpecialIpcRoute.open_serial);
+    ipcMain.removeAllListeners(tastekSpecialIpcRoute.close_serial);
     //绑定打开和关闭串口事件
-    ipcMain.on('open_serial', (event, arg) => {
-      console.log(arg);
-      console.log('---');
-      console.log(arg.comport);
-      let OpenPort = new SerialPort({
-        path: arg.comport,
-        baudRate: 9600,//Number(arg.combaud),
-        dataBits: 8,//Number(arg.comdata),
-        parity: 'none',//arg.comparity,
-        stopBits: 1//Number(arg.comstop)
-      }, function (err) {
-        if (err) {
-          console.log('open serial error: ', err.message)
-          event.reply('serial_open_error', err.message);
-          return;
-        }
+    ipcMain.on(tastekSpecialIpcRoute.open_serial, (event, arg) => {
+      self.app.logger.info('[tastekSpecialIpcRoute.open_serial] arg:', arg);
+      console.log(global.OpenPort);
+      if (global.OpenPort == null || global.OpenPort.opening) {
+        global.OpenPort = new SerialPort({
+          path: arg.comport,
+          baudRate: Number(arg.combaud),
+          dataBits: Number(arg.comdata),
+          parity: arg.comparity,
+          stopBits: Number(arg.comstop)
+        }, function (err) {
+          if (err) {
+            console.log('open serial error: ', err.message)
 
-        event.reply('open_serial_success', arg);
-      });
+            global.OpenPort = null;
+            event.reply(tastekSpecialIpcRoute.serial_open_error, err.message);//复用上面监听'controller.example.initSerialPort'时候的event
+            return;
+          }
 
+          event.reply(tastekSpecialIpcRoute.open_serial_success, arg);
+        });
+
+        global.OpenPort.on('open', () => {
+          console.log('open data');
+        });
+
+        // global.OpenPort = self.OpenPort;
+      }
     });
 
-    ipcMain.on('close_serial', (event, arg) => {
-      event.reply('close_serial_success', arg);
+    ipcMain.on(tastekSpecialIpcRoute.close_serial, (event, arg) => {
+      if (global.OpenPort != null) {
+        global.OpenPort.close(function (err) {
+          if (err) {
+            console.log(err);
+            event.reply(tastekSpecialIpcRoute.serial_close_error, err.message);//复用上面监听'controller.example.initSerialPort'时候的event
+            return;
+          }
+        });
+
+        event.reply(tastekSpecialIpcRoute.close_serial_success, arg);//复用上面监听'controller.example.initSerialPort'时候的event
+        global.OpenPort= null;
+      }
     });
+
+    //首次返回true
     return true
   }
 

@@ -10,21 +10,21 @@ class Main extends Appliaction {
   /**
    * core app have been loaded
    */
-  async ready () {
+  async ready() {
     // do some things
   }
 
   /**
    * electron app ready
    */
-  async electronAppReady () {
+  async electronAppReady() {
     // do some things
   }
 
   /**
    * main window have been loaded
    */
-  async windowReady () {
+  async windowReady() {
     // do some things
     // 延迟加载，无白屏
     const winOpt = this.config.windowsOption;
@@ -38,12 +38,14 @@ class Main extends Appliaction {
 
   /**
    * before app close
-   */  
-  async beforeClose () {
+   */
+  async beforeClose() {
     // do some things
 
   }
 }
-
+global.shareObject = {
+  name: '我是那个共享数据'
+}
 new Main();
- 
+

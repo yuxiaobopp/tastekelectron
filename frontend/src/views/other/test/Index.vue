@@ -12,6 +12,9 @@
             {{ comport }}
           </a-select-option>
         </a-select>
+        <a-form-model-item label="" prop="portopened">
+          <a-switch v-model="portopened" />
+        </a-form-model-item>
       </a-form-model-item>
       <a-form-model-item label="选择波特率">
         <a-select v-model="form.combaud" placeholder="请选择波特率" show-search>
@@ -71,8 +74,7 @@
   </div>
 </template>
 <script>
-import Vue from 'vue';
-import { ipcApiRoute, specialIpcRoute } from '@/api/main'
+import { tastekIpcApiRoute, tastekSpecialIpcRoute } from '@/api/special'
 export default {
   data() {
     return {
@@ -95,6 +97,7 @@ export default {
       }
     ]
       */
+      portopened: this.serialPorter.portopened,
       comportlist: ['COM0'],
       combaudlist: [
         '921600',
@@ -117,31 +120,37 @@ export default {
         comdata: '8',//数据位
         comparity: 'none',//校验位
         comstop: '1',//停止位
+
       },
     };
   },
-  computed: {
-
-  },
+  computed: {},
   mounted() {
-
-    //this.initSerialPort();
+    // 1、获取
     this.init();
-    this.sendNotification('获取串口列表');
+    this.sendNotification(1);
+
+    /*
+    this.init();
     //开启串口
-    console.log('++++++');
-    this.$ipc.on('open_serial_success', (event, result) => {
+    this.$ipc.on(tastekSpecialIpcRoute.open_serial_success, (event, result) => {
+      // self.$message.success('串口已打开');
       console.log(result);
     });
     //关闭串口
-    this.$ipc.on('close_serial_success', (event, result) => {
+    this.$ipc.on(tastekSpecialIpcRoute.close_serial_success, (event, result) => {
+      // self.$message.success('串口已关闭');
       console.log(result);
     });
 
     //串口操作异常
-    this.$ipc.on('serial_open_error', (event, result) => {
-      self.$message.erro(result);
+    this.$ipc.on(tastekIpcApiRoute.serial_open_error, (event, result) => {
+      // self.$message.error('操作失败，请检查串口是否被占用');
+      console.log(result);
     });
+
+    this.sendNotification(1);
+    */
   },
 
   methods: {
@@ -149,59 +158,77 @@ export default {
       this.$refs.ruleForm.resetFields();
     },
     init() {
+      console.log(this.serialPorter.portopened);
       // 避免重复监听，或者将 on 功能写到一个统一的地方，只加载一次
-      this.$ipc.removeAllListeners(ipcApiRoute.initSerialPort);
-      this.$ipc.on(ipcApiRoute.initSerialPort, (event, result) => {
-        console.log(result);
-        var templist = [];
-        if (Object.prototype.toString.call(result) == '[object Array]') {
-          result.forEach(function (item) {
-            console.log(item.path);
-            templist.push(item.path);
-          });
-          this.comportlist = templist;
+      this.$ipc.removeAllListeners(tastekIpcApiRoute.initSerialPort);
+      this.$ipc.on(tastekIpcApiRoute.initSerialPort, (event, result) => {
+        if (result == true) {
+          console.log('串口加载中');
+        } else {
+          var templist = [];
+          if (Object.prototype.toString.call(result) == '[object Array]') {
+            result.forEach(function (item) {
+              templist.push(item.path);
+            });
+            this.comportlist = templist;
+          }
+          console.log('串口加载完毕');
         }
       });
+
+      this.$ipc.removeAllListeners(tastekSpecialIpcRoute.open_serial_success);
+      this.$ipc.removeAllListeners(tastekSpecialIpcRoute.close_serial_success);
+      this.$ipc.removeAllListeners(tastekSpecialIpcRoute.serial_open_error);
+      this.$ipc.removeAllListeners(tastekSpecialIpcRoute.serial_close_error);
+      //开启串口
+      const self = this;
+      this.$ipc.on(tastekSpecialIpcRoute.open_serial_success, (event, result) => {
+        // self.$message.success('串口已打开');
+        console.log(result);
+        this.portopened = true;
+        this.serialPorter.portopened = true;
+        this.serialPorter.portinfo=result;
+      });
+      //关闭串口
+      this.$ipc.on(tastekSpecialIpcRoute.close_serial_success, (event, result) => {
+        // self.$message.success('串口已关闭');
+        console.log(result);
+        this.portopened = false;
+        this.serialPorter.portopened = false;
+      });
+
+      //串口操作异常
+      this.$ipc.on(tastekIpcApiRoute.serial_open_error, (event, result) => {
+        // self.$message.error('操作失败，请检查串口是否被占用');
+        console.log(result);
+      });
+
+      this.$ipc.on(tastekIpcApiRoute.serial_close_error, (event, result) => {
+        // self.$message.error('操作失败，请检查串口是否被占用');
+        console.log(result);
+      });
+
     },
     //默认与主进程通信方法
     sendNotification(index) {
-      this.$ipc.send(ipcApiRoute.initSerialPort, index);
-    },
-    initSerialPort() {
-      const self = this;
-      //通知主进程 开启串口操作的监听进程
-      this.$ipcInvoke(ipcApiRoute.initSerialPort, this.form).then(res => {
-        console.log('res:', res);
-        //TODO:提示串口准备就绪
-      });
-
-      // 避免重复监听，或者将 on 功能写到一个统一的地方，只加载一次
-      this.$ipc.removeAllListeners(ipcApiRoute.sendNotification);
-      //监听主进程通知
-      this.$ipc.on(specialIpcRoute.serial_list_success, (event, result) => {
-        console.log('1');
-      });
-
-      this.$ipc.on(ipcApiRoute.sendNotification, (event, result) => {
-        if (Object.prototype.toString.call(result) == '[object Object]') {
-          self.$message.info(result.msg);
-        }
-      });
+      this.$ipc.send(tastekIpcApiRoute.initSerialPort, index);
     },
     onOpenPort() {
       const self = this;
-      this.$refs.ruleForm.validate(valid => {
+      if (self.portopened == true) {
+        self.$message.error('串口已打开，请先关闭串口');
+        return;
+      }
+      self.$refs.ruleForm.validate(valid => {
         if (valid) {
-          this.$ipc.send('open_serial', this.form);
+          self.$ipc.send(tastekSpecialIpcRoute.open_serial, self.form);
         } else {
-          //self.$message.error('请选择串口');
           return false;
         }
       });
-
     },
     onClosePort() {
-      this.$ipc.send('open_serial', this.form);
+      this.$ipc.send(tastekSpecialIpcRoute.close_serial, this.form);
     },
     onGetAllPort() {
       this.sendNotification(1);

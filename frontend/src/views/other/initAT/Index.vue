@@ -130,6 +130,7 @@
 </template>
 <script>
 import { ipcApiRoute } from '@/api/main'
+import { tastekIpcApiRoute, tastekSpecialIpcRoute } from '@/api/special'
 export default {
   data() {
     return {
@@ -155,7 +156,7 @@ export default {
     },
     test() {
       console.log("++");
-      const msg = this.$ipcSendSync(ipcApiRoute.ipcATSendSyncMsg, 'AT');
+      const msg = this.$ipcSendSync(tastekIpcApiRoute.ipcATSendSyncMsg, 'AT');
       console.log(msg);
     },
     getAllTestData() {
@@ -164,7 +165,7 @@ export default {
         action: 'atgetall',
         searchkey: this.at_key,
       }
-      this.$ipcInvoke(ipcApiRoute.atsqlitedbOperation, params).then(res => {
+      this.$ipcInvoke(tastekIpcApiRoute.atsqlitedbOperation, params).then(res => {
         console.log('res:', res);
         if (res.atList.length == 0) {
           return false;
@@ -204,7 +205,7 @@ export default {
         return;
       }
       console.log(params);
-      this.$ipcInvoke(ipcApiRoute.atsqlitedbOperation, params).then(res => {
+      this.$ipcInvoke(tastekIpcApiRoute.atsqlitedbOperation, params).then(res => {
         console.log('res:', res);
         if (ac == 'atadd') {
           if (res.result) {

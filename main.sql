@@ -10,7 +10,7 @@
  Target Server Version : 3035005
  File Encoding         : 65001
 
- Date: 05/11/2022 17:52:06
+ Date: 11/11/2022 17:47:29
 */
 
 PRAGMA foreign_keys = false;
@@ -35,6 +35,15 @@ CREATE TABLE "atlist801" (
   "createtime" DATE,
   "ext" CHARACTER,
   "isdelete" integer
+);
+
+-- ----------------------------
+-- Table structure for configbase
+-- ----------------------------
+DROP TABLE IF EXISTS "configbase";
+CREATE TABLE "configbase" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "comport" CHARACTER
 );
 
 -- ----------------------------
@@ -174,6 +183,10 @@ CREATE TABLE "version" (
 -- Auto increment value for atlist801
 -- ----------------------------
 UPDATE "sqlite_sequence" SET seq = 50 WHERE name = 'atlist801';
+
+-- ----------------------------
+-- Auto increment value for configbase
+-- ----------------------------
 
 -- ----------------------------
 -- Auto increment value for docentry

@@ -5,6 +5,7 @@ import App from './App'
 import router from './router'
 import { VueAxios } from './utils/request'
 import IpcRenderer from '@/utils/ipcRenderer'
+import serialPorter from './serialporter'
 
 // 使用antd
 Vue.use(antd)
@@ -16,6 +17,9 @@ Vue.use(VueAxios)
 Vue.use(IpcRenderer)
 
 Vue.config.productionTip = false
+
+//全局串口参数
+Vue.prototype.serialPorter = serialPorter
 
 new Vue({
   router,
